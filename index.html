@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重庆巴渝民间中医药博物馆古籍</title>
+    <link rel="stylesheet" type="text/css" href="iconfont.css">
+    <style>
+        .img {
+            width:100px;
+            height:150px;
+        }
+        .box {
+            margin-left:10px;
+            width:100px;
+            height:400px;
+            display:flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .main {
+            width:100px;
+            height:100%;
+            float:left;
+        }
+        .main>div:nth-child(1) {
+            width:300px;
+            height:20px;
+            font:15px/20px "Microsoft";
+            text-align: center;
+        }
+        #search {
+            width:300px;
+            height:20px;
+            margin-top:10px;
+        }
+        .name {
+            width:100px;
+            height:20px;
+            font:4px/20px "Microsoft";
+        }
+        .writer {
+            width:100px;
+            height:20px;
+            font:2px/20px "Microsoft";
+        }
+        .version {
+            width:100px;
+            height:20px;
+            font:2px/20px "Microsoft";
+        }
+        #container {
+            height:100%;
+            float:left;
+            display:flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        .title {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">重庆巴渝民间中医药博物馆古籍</h1>
+    <div class="main">
+        <div>题名</div>
+        <input type="text" placeholder="请搜索" id="sousuo">
+        <input type="button" class="iconfont icon-sousuoxiao" id="button"></input>
+        <div>      </div>
+    </div>
+    <div id="container"></div>
+    <script>
+        async function search()
+        {
+            url = "http://42.192.155.29:8082/all";
+            let res = await fetch(url);
+            let ret = await res.json();
+            console.log(ret);
+            for(let i = 0; i < 35; i++)
+            {
+                let box = document.createElement('div');
+                box.className = 'box';
+                let img = document.createElement('img');
+                img.src=ret.data[i].URL;
+                img.className = 'img';
+                box.append(img);
+                let name = document.createElement('div');
+                name.innerText = "<<"+ret.data[i].Name +">>";
+                name.className = 'name';
+                box.append(name);
+                let writer = document.createElement('div');
+                writer.innerText = "  " + ret.data[i].Writer;
+                writer.className = 'writer';
+                box.append(writer);
+                let version = document.createElement('div');
+                version.innerText = " " + ret.data[i].Version;
+                version.className = "version";
+                box.append(version);
+                container.append(box);
+            }
+        }
+        search();
+        async function postData(url = '', data) {
+            // Default options are marked with *
+            const response = await fetch(url, {
+                method: 'POST',
+                mode: 'cors', 
+                //headers: {
+                    //'Content-Type': 'multipart/form-data',
+                    //'Content-Type': 'application/x-www-form-urlencoded',
+                //},
+                body: data 
+            });
+            return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+        button.onclick=()=>{
+            
+            let str = sousuo.value;
+            console.log(str);
+            let formdata = new FormData();
+            formdata.append("context",str);
+
+            postData('http://42.192.155.29:8082/search', formdata)
+            .then(data => {
+                console.log(data);
+                console.log(data.data.length);
+                let box = document.querySelectorAll('.box');
+                for(let i = 0; i < box.length; i++)
+                {
+                    box[i].remove();
+                }
+                for(let i = 0; i < data.data.length; i++)
+                {
+                    let box = document.createElement('div');
+                    box.className = 'box';
+                    let img = document.createElement('img');
+                    img.src=data.data[i].URL;
+                    img.className = 'img';
+                    box.append(img);
+                    let name = document.createElement('div');
+                    name.innerText = data.data[i].Name;
+                    name.className = 'name';
+                    box.append(name);
+                    let writer = document.createElement('div');
+                    writer.innerText = "作者:" + data.data[i].Writer;
+                    writer.className = 'writer';
+                    box.append(writer);
+                    let version = document.createElement('div');
+                    version.innerText = "版本:" + data.data[i].Version;
+                    version.className = "version";
+                    box.append(version);
+                    container.append(box);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
